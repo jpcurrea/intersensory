@@ -114,7 +114,7 @@ class Motor():
     """An object that plays a sequence of motor positions based on an input array,
     resampling when necessary to fit the lights ideal sampling rate."""
     def __init__(self, arr, arr_rate=10, pwm_rate=50, pwm_pin=17,
-                 max_light=1850, min_light=1200, cutoff_freq=20, delay=.1,
+                 max_light=1700, min_light=1000, cutoff_freq=20, delay=.1,
                  smooth=11):
         self.delay = delay
         self.cutoff = cutoff_freq
@@ -338,7 +338,7 @@ class A_2M_ISR():
     they can play in or out of synchrony.
     """
     def __init__(self, wav, aud_rate=44100, volume=1, pwm_pin1=17,
-                 pwm_pin2=18, max_light=1850, corr=1, corr_err=.01,
+                 pwm_pin2=18, max_light=1700, corr=1, corr_err=.01,
                  motor_rate=50, audio_delay=0,
                  motor1_delay=0, motor2_delay=.5, smooth=21):
         self.pwm_pin1=pwm_pin1
@@ -401,28 +401,39 @@ class A_2M_ISR():
 
         
 def vcorr(signal, corr, err=.01):
-    cval = 1. - (corr/2. + .5)
-    ncorr = 1
-    sigfft = np.fft.rfft(signal)
-    newsig = np.copy(signal)
-    corrs = []
-    # for x in range(100):
-    while abs(ncorr - corr) > err:
-        # randangs = 2*(np.random.rand(len(signal)) - .5)
-        # randangs *= 2*np.pi*cval
-        randangs = np.pi/6.*np.random.randn(len(signal)) + cval*np.pi
-        randangcnums = np.cos(randangs) + 1j*np.sin(randangs)
-        newsigfft = sigfft * randangcnums[:len(signal)/2 + 1]
-        newsig = np.fft.irfft(newsigfft)
-        ncorr = stats.pearsonr(newsig, signal)[0]
-        corrs += [ncorr]
+    if corr == 1:
+        newsig = signal
+    elif corr == -1:
+        newsig = signal.max() - signal
+    else:
+        cval = 1. - (corr/2. + .5)
+        ncorr = 1
+        sigfft = np.fft.rfft(signal)
+        newsig = np.copy(signal)
+        corrs = []
+        # for x in range(100):
+        while abs(ncorr - corr) > err:
+            # randangs = 2*(np.random.rand(len(signal)) - .5)
+            # randangs *= 2*np.pi*cval
+            randangs = np.pi/6.*np.random.randn(len(signal)) + cval*np.pi
+            randangcnums = np.cos(randangs) + 1j*np.sin(randangs)
+            newsigfft = sigfft * randangcnums[:len(signal)/2 + 1]
+            newsig = np.fft.irfft(newsigfft)
+            ncorr = stats.pearsonr(newsig, signal)[0]
+            corrs += [ncorr]
     # return corrs
     return newsig
 
-isr = A_V_ISR("./maternal_call.wav")
 
-# isr = A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1, audio_delay=0)
+# isr = A_V_ISR("./maternal_call.wav")
+
+isr = A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1, audio_delay=0)
 # m2 = Motor(isr.motor2.arr, arr_rate=50,
 #           pwm_pin=17, max_light=1800, min_light=1000,
 #            delay=0, smooth=21)
 
+# xs = np.linspace(0, 10*np.pi, 5000)
+# ys = 350*np.sin(xs) + 1350
+# for y in ys:
+#     set_height(y)
+#     time.sleep(.001)

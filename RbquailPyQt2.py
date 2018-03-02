@@ -107,17 +107,17 @@ class Example(QMainWindow):
         self.resize(500, 250)
 
         # action buttons
-        button_col = 150
+        button_col = 330
         # swap button to swap synch and asynch settings
         self.swap_button = QPushButton('Swap', self)
-        self.swap_button.move(button_col, 130)
+        self.swap_button.move(button_col, 70)
         self.swap_button.adjustSize()
         self.swap_button.setCheckable(True)
         self.swap_button.clicked.connect(self.swap)
 
         # start button
         self.button = QPushButton('Start Bobbing', self)
-        self.button.move(button_col, 160)
+        self.button.move(button_col, 100)
         self.button.adjustSize()
         self.button.setCheckable(True)
         self.button.clicked.connect(self.onClick)
@@ -125,7 +125,7 @@ class Example(QMainWindow):
         # progress bar
         self.progressBar = QProgressBar(self)
         self.progressBar.setRange(0, 1)
-        self.progressBar.move(button_col, 190)
+        self.progressBar.move(button_col, 130)
 
         self.show()
 
@@ -222,7 +222,7 @@ class MyThread(QThread):
     def run(self):
         # do some functionality
         # time.sleep(2)
-        self.isr = ISR.A_2M_ISR("./maternal_call.wav", corr=1, corr_err=.1,
+        self.isr = ISR.A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1,
                                 pwm_pin1=self.pin1, pwm_pin2=self.pin2,
                                 motor1_delay=self.motor_delay1,
                                 motor2_delay=self.motor_delay2,
