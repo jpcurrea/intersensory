@@ -37,8 +37,8 @@ def playAudio(output, sample_rate=44100):
 class Light():
     """An object that plays a sequence of light levels based on an input array,
     resampling when necessary to fit the lights ideal sampling rate."""
-    def __init__(self, arr, arr_rate=10, pwm_rate=50, pwm_pin=12,
-                 max_light=100, delay=.1):
+    def __init__(self, arr, arr_rate=10, pwm_rate=1000, pwm_pin=12,
+                 max_light=255, delay=.1):
         self.delay = delay
         self.arr_rate = arr_rate
         self.pwm_rate = pwm_rate
@@ -61,15 +61,18 @@ class Light():
 
     def GPIO_setup(self):
         """Setup board pin numbers"""
-        GPIO.setmode(GPIO.BOARD)
+        self.pwm = pigpio.pi()
+        self.pwm.set_PWM_frequency(self.pwm_pin, self.pwm_rate)
+        self.pwm_rate = self.pwm.get_PWM_frequency(self.pwm_pin)
+        # GPIO.setmode(GPIO.BOARD)
 
-        # not sure why, but these setup methods were done before
-        GPIO.setup(self.pwm_pin, GPIO.OUT)
-        GPIO.output(self.pwm_pin, GPIO.LOW)  # consider GPIO.HIGH
+        # # not sure why, but these setup methods were done before
+        # GPIO.setup(self.pwm_pin, GPIO.OUT)
+        # GPIO.output(self.pwm_pin, GPIO.LOW)  # consider GPIO.HIGH
 
-        # declares the pwm class the light at 0 intensity
-        self.pwm = GPIO.PWM(self.pwm_pin, self.pwm_rate)
-        self.pwm.start(0)
+        # # declares the pwm class the light at 0 intensity
+        # self.pwm = GPIO.PWM(self.pwm_pin, self.pwm_rate)
+        # self.pwm.start(0)
 
     def prep(self, delay=None):
         if delay is not None:
@@ -79,7 +82,9 @@ class Light():
         else:
             t = 0
         for val in self.arr:
-            self.player.enter(t, 1, self.pwm.ChangeDutyCycle, argument=(val,))
+            # self.player.enter(t, 1, self.pwm.ChangeDutyCycle, argument=(val,))
+            self.player.enter(t, 1, self.pwm.set_PWM_dutycycle,
+                              argument=(self.pwm_pin, val,))
             t += self.arr_rate**-1
 
     def play(self, delay=.1):
@@ -235,7 +240,7 @@ class A_V_ISR():
     """Object that takes in waveform and combines and light and audio object so
     they can play in or out of synchrony.
     """
-    def __init__(self, wav, aud_rate=44100, volume=1, pwm_pin=12,
+    def __init__(self, wav, aud_rate=44100, volume=1, pwm_pin=17,
                  max_light=100, corr=1, corr_err=.01, audio_delay=None,
                  light_delay=.3):
         self.audio_delay = audio_delay
@@ -252,7 +257,7 @@ class A_V_ISR():
         self.audio.prep()
         self.audio.play()
         self.light.play()
-        self.light.pwm.ChangeDutyCycle(0)
+        self.light.pwm.set_PWM_dutycycle(self.light.pwm_pin, 0)
 
     def audio2light(self, corr=1, err=.01):
         """Generate a light sequence that is corr correlated with audio signal.
@@ -414,7 +419,9 @@ def vcorr(signal, corr, err=.01):
     # return corrs
     return newsig
 
-isr = A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1, audio_delay=0)
+isr = A_V_ISR("./maternal_call.wav")
+
+# isr = A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1, audio_delay=0)
 # m2 = Motor(isr.motor2.arr, arr_rate=50,
 #           pwm_pin=17, max_light=1800, min_light=1000,
 #            delay=0, smooth=21)
