@@ -427,7 +427,7 @@ def vcorr(signal, corr, err=.01):
 
 # isr = A_V_ISR("./maternal_call.wav")
 
-isr = A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1, audio_delay=0)
+# isr = A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1, audio_delay=0)
 # m2 = Motor(isr.motor2.arr, arr_rate=50,
 #           pwm_pin=17, max_light=1800, min_light=1000,
 #            delay=0, smooth=21)
