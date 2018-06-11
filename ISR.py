@@ -74,20 +74,20 @@ class Light():
         # self.pwm = GPIO.PWM(self.pwm_pin, self.pwm_rate)
         # self.pwm.start(0)
 
-    def prep(self, delay=None):
-        if delay is not None:
-            t = delay
-        elif self.delay is not None:
+    def prep(self, delay=0, duration=None):
+        if self.delay is not None:
             t = self.delay
         else:
-            t = 0
-        for val in self.arr:
-            # self.player.enter(t, 1, self.pwm.ChangeDutyCycle, argument=(val,))
-            self.player.enter(t, 1, self.pwm.set_PWM_dutycycle,
-                              argument=(self.pwm_pin, val,))
-            t += self.arr_rate**-1
+            t = delay
+        if duration is None:
+            duration = self.duration
+        while t < duration:
+            for val in self.arr:
+                self.player.enter(t, 1, self.pwm.set_PWM_dutycycle,
+                                  argument=(self.pwm_pin, val,))
+                t += self.arr_rate**-1
 
-    def play(self, delay=.1):
+    def play(self):
         self.player.run()
         self.GPIO_setup()
         
@@ -216,16 +216,18 @@ class Audio():
         if mixer.get_busy():
             mixer.stop()    
         
-    def thread_play(self, dur=None, loops=0, fade=0, delay=None):
+    def thread_play(self, dur=None, loops=None, fade=0, delay=None):
         if delay is not None:
             time.sleep(delay)
         elif self.delay is not None:
             time.sleep(self.delay)
         if dur is None:
-            dur = int(self.duration/1000.)
-        self.player.play(loops, dur, fade)
+            dur = self.duration
+        if loops is None:
+            loops = int(math.ceil(float(dur)/float(self.duration) - 1))
+        self.player.play(loops, int(dur/1000.), fade)
 
-    def play(self, dur=None, loops=0, fade=0, delay=None):
+    def play(self, dur=None, loops=None, fade=0, delay=None):
         threading.Thread(target=self.thread_play,
                          args=(dur, loops, fade, delay)).start()
 
@@ -252,10 +254,12 @@ class A_V_ISR():
                            pwm_pin=pwm_pin, max_light=max_light,
                            delay=self.light_delay)
         self.light.GPIO_setup()
-    def play(self):
-        self.light.prep()
+    def play(self, duration=None):
+        if duration is None:
+            duration = self.audio.duration
+        self.light.prep(duration=duration)
         self.audio.prep()
-        self.audio.play()
+        self.audio.play(dur=duration)
         self.light.play()
         self.light.pwm.set_PWM_dutycycle(self.light.pwm_pin, 0)
 
@@ -264,7 +268,7 @@ class A_V_ISR():
         """
         light_samples = round(self.audio.duration*60)
         light_signal = abs(self.audio.arr.mean(-1))
-        self.light_signal = signal.resample(light_signal, light_samples)
+        self.light_signal = signal.resample(light_signal, int(light_samples))
         if corr < 1:
             self.light_signal = vcorr(self.light_signal, corr, err)
         ls = self.light_signal
@@ -425,7 +429,7 @@ def vcorr(signal, corr, err=.01):
     return newsig
 
 
-# isr = A_V_ISR("./maternal_call.wav")
+isr = A_V_ISR("/home/pi/Desktop/maternal_call.wav")
 
 # isr = A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1, audio_delay=0)
 # m2 = Motor(isr.motor2.arr, arr_rate=50,
