@@ -8,11 +8,12 @@ setup(name="ISR",
       author_email='johnpaulcurrea@gmail.com',
       license='MIT',
       packages=['ISR'],
+      setup_requires=['numpy']
       install_requires=[
-          'numpy',
           'matplotlib',
+          'scipy',
           'pigpio',
           'pygame'
       ],
-      dependency_links=["https://github.com/scipy/scipy.git"],
+      dependency_links=["https://github.com/scipy/scipy"],
       zip_safe=False)
