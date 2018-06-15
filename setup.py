@@ -10,9 +10,9 @@ setup(name="ISR",
       packages=['ISR'],
       install_requires=[
           'numpy',
-          'scipy',
           'matplotlib',
           'pigpio',
           'pygame'
       ],
+      dependency_links=["https://github.com/scipy/scipy.git"],
       zip_safe=False)
