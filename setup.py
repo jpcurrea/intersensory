@@ -8,7 +8,7 @@ setup(name="ISR",
       author_email='johnpaulcurrea@gmail.com',
       license='MIT',
       packages=['ISR'],
-      setup_requires=['numpy']
+      setup_requires=['numpy'],
       install_requires=[
           'matplotlib',
           'scipy',
