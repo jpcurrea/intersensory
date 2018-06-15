@@ -427,17 +427,3 @@ def vcorr(signal, corr, err=.01):
             corrs += [ncorr]
     # return corrs
     return newsig
-
-
-isr = A_V_ISR("/home/pi/Desktop/maternal_call.wav")
-
-# isr = A_2M_ISR("./maternal_call.wav", corr=-1, corr_err=.1, audio_delay=0)
-# m2 = Motor(isr.motor2.arr, arr_rate=50,
-#           pwm_pin=17, max_light=1800, min_light=1000,
-#            delay=0, smooth=21)
-
-# xs = np.linspace(0, 10*np.pi, 5000)
-# ys = 350*np.sin(xs) + 1350
-# for y in ys:
-#     set_height(y)
-#     time.sleep(.001)
