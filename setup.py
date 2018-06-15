@@ -15,5 +15,4 @@ setup(name="ISR",
           'pigpio',
           'pygame'
       ],
-      dependency_links=["https://github.com/scipy/scipy"],
       zip_safe=False)
