@@ -67,8 +67,8 @@ class DaySched():
         self.times += interval_length*np.arange(self.num_bouts)
 	self.times += time.time()
         for t in self.times:
-            self.player.enter(delay=t, priority=1, action=self.play_bout,
-                              argument=())
+            self.player.enterabs(time=t, priority=1, action=self.play_bout,
+                                 argument=())
 
     def play(self, ):
         self.player.run()
