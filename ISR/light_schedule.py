@@ -65,6 +65,7 @@ class DaySched():
             self.times = np.repeat(.5, self.num_bouts)
         self.times *= (interval_length - self.bout_duration)
         self.times += interval_length*np.arange(self.num_bouts)
+	self.times += time.time()
         for t in self.times:
             self.player.enter(delay=t, priority=1, action=self.play_bout,
                               argument=())
@@ -75,10 +76,10 @@ class DaySched():
 
 if __name__ == "__main__":
     stim = isr.A_V_ISR("/home/pi/Desktop/maternal_call.wav", light_delay=.34)
-    # day_sequence = DaySched(stim, 3, 10*60, 11.5*60*60)
+    day_sequence = DaySched(stim, 3, 10*60, 11.5*60*60)
     # long duration test:
     # day_sequence = DaySched(stim, 12, 10*60, 48*60*60)
     #for calibration/troubleshooting:
-    day_sequence = DaySched(stim, 3, 10, 6*10)
+    # day_sequence = DaySched(stim, 1, 6*10, 7*10)
     day_sequence.schedule()
     day_sequence.play()
