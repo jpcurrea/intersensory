@@ -77,18 +77,19 @@ class DaySched():
     def play(self, ):
         for bout_time in self.times:
             delay = bout_time - time.time()
-            time.sleep(delay)
+            if delay > 0:
+                time.sleep(delay)
             self.play_bout()
         # self.player.run()
         
 if __name__ == "__main__":
-    # stim = isr.A_V_ISR("/home/pi/Desktop/maternal_call.wav", light_delay=.34)
-    stim = isr.A_V_ISR("/home/pi/Desktop/maternal_call.wav", light_delay=.84)
-    day_sequence = DaySched(stim, 3, 10*60, 11.5*60*60)
+    stim = isr.A_V_ISR("/home/pi/Desktop/maternal_call.wav", light_delay=.34)
+    # stim = isr.A_V_ISR("/home/pi/Desktop/maternal_call.wav", light_delay=.84)
+    day_sequence = DaySched(stim, 3, 10*60, 12*60*60)
     # long duration test:
     # day_sequence = DaySched(stim, 12, 10*60, 48*60*60)
     # for calibration/troubleshooting:
-    # day_sequence = DaySched(stim, 10, 3, 10*60)
+    # day_sequence = DaySched(stim, 10, 8, 10*10)
     day_sequence.schedule()
     # import pdb; pdb.set_trace()
     day_sequence.play()

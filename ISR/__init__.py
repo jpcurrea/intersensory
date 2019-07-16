@@ -89,7 +89,6 @@ class Light():
 
     def play(self):
         self.player.run()
-        self.GPIO_setup()
         
     def play_parallel(self, delay=.1):
         self.prep(delay)
@@ -102,7 +101,8 @@ class Light():
     def stop(self):
         while len(self.player.queue) > 0:
             self.player.cancel(self.player.queue[0])
-            
+        self.pwm.set_PWM_dutycycle(self.pwm_pin, 0)            
+
     def playing(self):
         return len(self.player.queue) > 0
 
@@ -261,7 +261,6 @@ class A_V_ISR():
         self.audio.prep()
         self.audio.play(dur=duration)
         self.light.play()
-        self.light.pwm.set_PWM_dutycycle(self.light.pwm_pin, 0)
 
     def audio2light(self, corr=1, err=.01):
         """Generate a light sequence that is corr correlated with audio signal.

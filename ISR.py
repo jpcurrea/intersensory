@@ -89,7 +89,8 @@ class Light():
 
     def play(self):
         self.player.run()
-        self.GPIO_setup()
+        time.sleep(self.duration)
+        self.stop()
         
     def play_parallel(self, delay=.1):
         self.prep(delay)
@@ -102,7 +103,8 @@ class Light():
     def stop(self):
         while len(self.player.queue) > 0:
             self.player.cancel(self.player.queue[0])
-            
+        self.pwm.set_PWM_dutycycle(self.pwm_pin, 0)            
+
     def playing(self):
         return len(self.player.queue) > 0
 
@@ -230,6 +232,8 @@ class Audio():
     def play(self, dur=None, loops=None, fade=0, delay=None):
         threading.Thread(target=self.thread_play,
                          args=(dur, loops, fade, delay)).start()
+        time.sleep(self.duration)
+        self.stop()
 
     def stop(self):
         if self.playing:
