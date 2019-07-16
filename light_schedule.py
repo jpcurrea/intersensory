@@ -26,7 +26,7 @@ class DaySched():
         self.num_bouts = num_bouts
         self.random = random
 
-        self.player = sched.scheduler(time.time, time.sleep)
+        self.player = sched.scheduler(timefunc=time.time, delayfunc=time.sleep)
     
         self.log = log
         if self.log:
@@ -35,8 +35,6 @@ class DaySched():
                                        str(datetime.date.today())))
 
     def play_bout(self):
-        a = time.time()
-        b = a
         self.log_text("\n{}, start ISR".format(
             str(datetime.datetime.now())))
         try:
@@ -59,6 +57,13 @@ class DaySched():
             log.close()
 
         interval_length = float(self.total_duration)/float(self.num_bouts)
+        # self.available_times = np.arange(self.total_duration - self.bout_duration)
+        # for bout in range(self.num_bouts):
+        #     if self.random:
+        #         start_time = np.random.choice(self.available_times)
+        #     else:
+        #         start_time = 
+
         if self.random:
             self.times = np.random.rand(self.num_bouts)
         else:
@@ -66,20 +71,24 @@ class DaySched():
         self.times *= (interval_length - self.bout_duration)
         self.times += interval_length*np.arange(self.num_bouts)
 	self.times += time.time()
-        for t in self.times:
-            self.player.enterabs(time=t, priority=1, action=self.play_bout,
-                                 argument=())
-
+        for bout_time in self.times:
+            self.player.enter(delay=bout_time, priority=1, action=self.play_bout,
+                              argument=())
     def play(self, ):
-        self.player.run()
+        for bout_time in self.times:
+            delay = bout_time - time.time()
+            time.sleep(delay)
+            self.play_bout()
+        # self.player.run()
         
-
 if __name__ == "__main__":
-    stim = isr.A_V_ISR("/home/pi/Desktop/maternal_call.wav", light_delay=.34)
+    # stim = isr.A_V_ISR("/home/pi/Desktop/maternal_call.wav", light_delay=.34)
+    stim = isr.A_V_ISR("/home/pi/Desktop/maternal_call.wav", light_delay=.84)
     day_sequence = DaySched(stim, 3, 10*60, 11.5*60*60)
     # long duration test:
     # day_sequence = DaySched(stim, 12, 10*60, 48*60*60)
-    #for calibration/troubleshooting:
-    # day_sequence = DaySched(stim, 1, 6*10, 7*10)
+    # for calibration/troubleshooting:
+    # day_sequence = DaySched(stim, 10, 3, 10*60)
     day_sequence.schedule()
+    # import pdb; pdb.set_trace()
     day_sequence.play()
